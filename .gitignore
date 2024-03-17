@@ -2,6 +2,8 @@
 *
 
 # folders to include
+!assets
+!assets/**
 !include/
 !include/**
 !resources/

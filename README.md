@@ -5,6 +5,13 @@ _The SIDPod is a PSID player for RP2040 microcontroller based boards, such as th
 [Solder Party RP2040 Stamp](https://www.solder.party/docs/rp2040-stamp/). Playback is based on the SID emulator found in
 [Rockbox](https://www.rockbox.org/), which in turn is based on TinySID._
 
+## NEW VERSION IN PROGRESS
+Current status of SIDPod-SDCard is work in progress.
+Development is being done in VSCode with WSL2. OpenOCD runs on linux box and gdb connects from WSL2.
+
+In the photo below are two sidpods, one original and one sdcard.
+![](assets/sidpod_sdcard.jpg)
+
 ___
 
 <!-- TOC -->
@@ -79,17 +86,17 @@ Since the main goal is to make a portable player, the actual build and design is
 prototype is built inside a 3-AA battery box I had lying around, using a Solder Party RP2040 Stamp and a 3.7V 150mAh
 LiPo battery. However, the breadboard design I'm using for development, based on a Raspberry Pi Pico H, looks like this:
 
-![](assets/SIDPod_bb.png)  
+![](assets/SIDPod_bb.png)
 _The breadboard schematics._
 
 In reality, the development breadboard looks a bit different. I use a dual lane breadboard and connect to the SIDPod
 Pico board via a [Picoprobe](https://github.com/raspberrypi/picoprobe), for debugging and a less painful development
 process.
 
-![](assets/SIDPod_bb_photo.jpg)  
+![](assets/SIDPod_bb_photo.jpg)
 _The development breadboard setup._
 
-![](assets/SIDPod_prototype.jpg)  
+![](assets/SIDPod_prototype.jpg)
 _The working prototype. Please excuse the soldering. I'm a lover, not a solderer. 😜_
 
 #### Power

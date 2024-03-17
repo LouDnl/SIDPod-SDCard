@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------/
-/  FatFs - Generic FAT Filesystem Module  R0.15                               /
+/  FatFs - Generic FAT Filesystem Module  R0.15 w/patch1                      /
 /-----------------------------------------------------------------------------/
 /
 / Copyright (C) 2022, ChaN, all right reserved.
@@ -278,7 +278,7 @@
 
 
 /* File lock controls */
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 #if FF_FS_READONLY
 #error FF_FS_LOCK must be 0 at read-only configuration
 #endif
@@ -900,7 +900,7 @@ static int lock_volume (	/* 1:Ok, 0:timeout */
 	int rv;
 
 
-#if FS_LOCK
+#if FF_FS_LOCK
 	rv = ff_mutex_take(fs->ldrv);	/* Lock the volume */
 	if (rv && syslock) {			/* System lock reqiered? */
 		rv = ff_mutex_take(FF_VOLUMES);	/* Lock the system */
@@ -937,7 +937,7 @@ static void unlock_volume (
 
 
 
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 /*-----------------------------------------------------------------------*/
 /* File shareing control functions                                       */
 /*-----------------------------------------------------------------------*/
@@ -1044,7 +1044,7 @@ static void clear_share (	/* Clear all lock entries of the volume */
 	}
 }
 
-#endif	/* FF_FS_LOCK != 0 */
+#endif	/* FF_FS_LOCK */
 
 
 
@@ -3597,7 +3597,7 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
 #if FF_FS_RPATH != 0
 	fs->cdir = 0;			/* Initialize current directory */
 #endif
-#if FF_FS_LOCK != 0			/* Clear file lock semaphores */
+#if FF_FS_LOCK				/* Clear file lock semaphores */
 	clear_share(fs);
 #endif
 	return FR_OK;
@@ -3673,7 +3673,7 @@ FRESULT f_mount (
 
 	if (cfs) {					/* Unregister current filesystem object if regsitered */
 		FatFs[vol] = 0;
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 		clear_share(cfs);
 #endif
 #if FF_FS_REENTRANT				/* Discard mutex of the current volume */
@@ -3687,7 +3687,7 @@ FRESULT f_mount (
 #if FF_FS_REENTRANT				/* Create a volume mutex */
 		fs->ldrv = (BYTE)vol;	/* Owner volume ID */
 		if (!ff_mutex_create(vol)) return FR_INT_ERR;
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 		if (SysLock == 0) {		/* Create a system mutex if needed */
 			if (!ff_mutex_create(FF_VOLUMES)) {
 				ff_mutex_delete(vol);
@@ -3745,7 +3745,7 @@ FRESULT f_open (
 			if (dj.fn[NSFLAG] & NS_NONAME) {	/* Origin directory itself? */
 				res = FR_INVALID_NAME;
 			}
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 			else {
 				res = chk_share(&dj, (mode & ~FA_READ) ? 1 : 0);	/* Check if the file can be used */
 			}
@@ -3755,7 +3755,7 @@ FRESULT f_open (
 		if (mode & (FA_CREATE_ALWAYS | FA_OPEN_ALWAYS | FA_CREATE_NEW)) {
 			if (res != FR_OK) {					/* No file, create new */
 				if (res == FR_NO_FILE) {		/* There is no file to open, create a new entry */
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 					res = enq_share() ? dir_register(&dj) : FR_TOO_MANY_OPEN_FILES;
 #else
 					res = dir_register(&dj);
@@ -3825,7 +3825,7 @@ FRESULT f_open (
 			if (mode & FA_CREATE_ALWAYS) mode |= FA_MODIFIED;	/* Set file change flag if created or overwritten */
 			fp->dir_sect = fs->winsect;			/* Pointer to the directory entry */
 			fp->dir_ptr = dj.dir;
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 			fp->obj.lockid = inc_share(&dj, (mode & ~FA_READ) ? 1 : 0);	/* Lock the file for this session */
 			if (fp->obj.lockid == 0) res = FR_INT_ERR;
 #endif
@@ -3889,7 +3889,7 @@ FRESULT f_open (
 #endif
 					}
 				}
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 				if (res != FR_OK) dec_share(fp->obj.lockid); /* Decrement file open counter if seek failed */
 #endif
 			}
@@ -4227,7 +4227,7 @@ FRESULT f_close (
 	{
 		res = validate(&fp->obj, &fs);	/* Lock volume */
 		if (res == FR_OK) {
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 			res = dec_share(fp->obj.lockid);		/* Decrement file open counter */
 			if (res == FR_OK) fp->obj.fs = 0;	/* Invalidate file object */
 #else
@@ -4633,7 +4633,7 @@ FRESULT f_opendir (
 			if (res == FR_OK) {
 				dp->obj.id = fs->id;
 				res = dir_sdi(dp, 0);			/* Rewind directory */
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 				if (res == FR_OK) {
 					if (dp->obj.sclust != 0) {
 						dp->obj.lockid = inc_share(dp, 0);	/* Lock the sub directory */
@@ -4670,7 +4670,7 @@ FRESULT f_closedir (
 
 	res = validate(&dp->obj, &fs);	/* Check validity of the file object */
 	if (res == FR_OK) {
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 		if (dp->obj.lockid) res = dec_share(dp->obj.lockid);	/* Decrement sub-directory open counter */
 		if (res == FR_OK) dp->obj.fs = 0;	/* Invalidate directory object */
 #else
@@ -4982,7 +4982,7 @@ FRESULT f_unlink (
 		if (FF_FS_RPATH && res == FR_OK && (dj.fn[NSFLAG] & NS_DOT)) {
 			res = FR_INVALID_NAME;			/* Cannot remove dot entry */
 		}
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 		if (res == FR_OK) res = chk_share(&dj, 2);	/* Check if it is an open object */
 #endif
 		if (res == FR_OK) {					/* The object is accessible */
@@ -5157,7 +5157,7 @@ FRESULT f_rename (
 		INIT_NAMBUF(fs);
 		res = follow_path(&djo, path_old);			/* Check old object */
 		if (res == FR_OK && (djo.fn[NSFLAG] & (NS_DOT | NS_NONAME))) res = FR_INVALID_NAME;	/* Check validity of name */
-#if FF_FS_LOCK != 0
+#if FF_FS_LOCK
 		if (res == FR_OK) {
 			res = chk_share(&djo, 2);
 		}

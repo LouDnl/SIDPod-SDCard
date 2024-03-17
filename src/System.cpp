@@ -2,7 +2,6 @@
 #include <hardware/pll.h>
 #include <hardware/clocks.h>
 #include <cstdio>
-#include <device/usbd.h>
 #include <pico/multicore.h>
 #include <hardware/xosc.h>
 #include "System.h"
@@ -14,25 +13,12 @@ struct repeating_timer tudTaskTimer{};
 
 bool connected = false;
 
-void tud_mount_cb(void) {
-    multicore_reset_core1();
-    SIDPlayer::ampOff();
-    UI::stop();
-    f_unmount("");
-    connected = true;
-}
-
-void tud_suspend_cb(bool remote_wakeup_en) {
-    (void) remote_wakeup_en;
-    System::softReset();
-}
-
 void System::configureClocks() {
+    TRACE_PRINTF(">>> %s\n", __FUNCTION__);
     clocks_hw->resus.ctrl = 0;
     xosc_init();
     pll_init(pll_sys, 1, 1500 * MHZ, 6, 2);
     pll_init(pll_sys, 1, 1500 * MHZ, 6, 2);
-    pll_init(pll_usb, 1, 1200 * MHZ, 5, 5);
     clock_configure(clk_ref,
                     CLOCKS_CLK_REF_CTRL_SRC_VALUE_XOSC_CLKSRC,
                     0,
@@ -43,11 +29,6 @@ void System::configureClocks() {
                     CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
                     125 * MHZ,
                     125 * MHZ);
-    clock_configure(clk_usb,
-                    0,
-                    CLOCKS_CLK_USB_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB,
-                    48 * MHZ,
-                    48 * MHZ);
     clock_configure(clk_adc,
                     0,
                     CLOCKS_CLK_ADC_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB,
@@ -94,19 +75,4 @@ void System::sleepUntilDoubleClick() {
         }
     }
     gpio_pull_up(ENC_SW_PIN);
-}
-
-void System::enableUsb() {
-    tud_init(BOARD_TUD_RHPORT);
-    add_repeating_timer_ms(1, repeatingTudTask, nullptr, &tudTaskTimer);
-}
-
-bool System::repeatingTudTask(struct repeating_timer *t) {
-    (void) t;
-    tud_task();
-    return true;
-}
-
-bool System::usbConnected() {
-    return connected;
 }

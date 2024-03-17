@@ -3,6 +3,12 @@
 #include <cstdio>
 #include "PSIDCatalog.h"
 #include "platform_config.h"
+// custom
+#include "hw_config.h"
+#include "sd_card.h"
+#include "ff.h"
+#include "f_util.h"
+#include "ff_util.h"
 
 FATFS *fs = new FATFS;
 uint32_t PSID_ID = 0x50534944;
@@ -13,12 +19,14 @@ uint8_t selectedPosition = 0;
 uint8_t windowSize = CATALOG_WINDOW_SIZE;
 
 void PSIDCatalog::refresh() {
+    TRACE_PRINTF(">>> %s\n", __FUNCTION__);
     DIR *dp;
     FILINFO fno;
     FRESULT fr;
     dp = new DIR;
     catalog.clear();
-    f_mount(fs, "", FA_READ);
+    sd_card_t *pSD = sd_get_by_num(0);
+    f_mount(&pSD->fatfs, pSD->pcName, 1);
     f_opendir(dp, "");
     while (true) {
         fr = f_readdir(dp, &fno);

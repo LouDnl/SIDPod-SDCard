@@ -59,7 +59,7 @@
 
 #include "sid.h"
 #include <string.h>
-#include "../platform_config.h"
+#include "platform_config.h"
 
 #define ICODE_ATTR
 #define IDATA_ATTR

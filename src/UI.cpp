@@ -3,11 +3,11 @@
 #include <cstdio>
 #include "UI.h"
 #include "platform_config.h"
-#include "display/include/ssd1306.h"
+#include "ssd1306.h"
 #include "PSIDCatalog.h"
-#include "audio/SIDPlayer.h"
+#include "SIDPlayer.h"
 #include "quadrature_encoder.pio.h"
-#include "visualization/DanceFloor.h"
+#include "DanceFloor.h"
 #include "sidpod_bmp.h"
 #include "System.h"
 
@@ -20,18 +20,19 @@ auto volumeLabel = "Volume";
 auto lineLevelLabel = "Line level:";
 auto yesLabel = "Yes";
 auto noLabel = "No";
-auto emptyFlashMsg = {"No playable PSIDs.", "Use USB to transfer", "PSIDs to the root", "of the SIDPod."};
+auto emptyFlashMsg = {"No playable PSIDs.", "Use a computer to", " copy PSIDs to the", "SDCard root."};
 float longTitleScrollOffset, playingSymbolAnimationCounter = 0;
 Visualization::DanceFloor *danceFloor;
 UI::State currentState = UI::splash;
 UI::State lastState = currentState;
 
 void UI::initUI() {
+    TRACE_PRINTF(">>> %s\n", __FUNCTION__);
     gpio_init(ENC_SW_PIN);
     gpio_set_dir(ENC_SW_PIN, GPIO_IN);
     gpio_pull_up(ENC_SW_PIN);
-    uint offset = pio_add_program(pio1, &quadrature_encoder_program);
-    quadrature_encoder_program_init(pio1, ENC_SM, offset, ENC_BASE_PIN, 0);
+    uint offset = pio_add_program(ENC_PIO, &quadrature_encoder_program);
+    quadrature_encoder_program_init(ENC_PIO, ENC_SM, offset, ENC_BASE_PIN, 0);
     danceFloor = new Visualization::DanceFloor(&disp);
 }
 
@@ -196,6 +197,7 @@ void UI::stop() {
 }
 
 void UI::start() {
+    TRACE_PRINTF(">>> %s\n", __FUNCTION__);
     add_repeating_timer_ms(USER_CONTROLS_POLLRATE_MS, pollUserControls, nullptr, &userControlTimer);
 }
 

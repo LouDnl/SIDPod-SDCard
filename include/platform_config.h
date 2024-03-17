@@ -1,11 +1,5 @@
-#include "hardware/flash.h"
-
-#ifdef SOLDERPARTY_RP2040_STAMP
-#define FLASH_STORAGE_BYTES (7552 * 1024)
-#endif
-#ifdef RASPBERRYPI_PICO
-#define FLASH_STORAGE_BYTES                 (1408 * 1024)
-#endif
+// #define TRACE_PRINTF(fmt, args...)
+#define TRACE_PRINTF printf  // task_printf
 
 #define AIRCR_Register                      (*((volatile uint32_t*)(PPB_BASE + 0x0ED0C)))
 #define SYSRESETREQ                         0x5FA0004
@@ -14,7 +8,7 @@
 #define FLASH_BASE_ADDR                     (PICO_FLASH_SIZE_BYTES - FLASH_STORAGE_BYTES)
 #define FLASH_MMAP_ADDR                     (XIP_BASE + FLASH_BASE_ADDR)
 
-#define FS_LABEL                            "SIDPOD"
+// #define FS_LABEL                            "SIDPOD"
 
 #define BOARD_TUD_RHPORT                    0
 
@@ -30,7 +24,7 @@
 #define DISPLAY_GPIO_BASE_PIN               2
 #define DISPLAY_EXTERNAL_VCC                0
 #define DISPLAY_WIDTH                       128
-#define DISPLAY_HEIGHT                      32
+#define DISPLAY_HEIGHT                      64 //32
 #define DISPLAY_I2C_ADDRESS                 0x3C
 #define DISPLAY_STATE_CHANGE_DELAY_MS       500
 #define FONT_WIDTH                          6

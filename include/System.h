@@ -9,16 +9,16 @@ public:
 
     static void softReset();
 
-    static void enableUsb();
+    // static void enableUsb();
 
-    static void runExclusiveUsbDBurst();
+    // static void runExclusiveUsbDBurst();
 
-    static bool usbConnected();
+    // static bool usbConnected();
 
 private:
     static void sleepUntilDoubleClick();
 
-    static bool repeatingTudTask(struct repeating_timer *t);
+    // static bool repeatingTudTask(struct repeating_timer *t);
 };
 
 #endif //SIDPOD_SYSTEM_H

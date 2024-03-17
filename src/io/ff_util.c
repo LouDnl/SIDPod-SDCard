@@ -1,7 +1,12 @@
-#include <malloc.h>
+#include <stdio.h>
+#include "pico/stdlib.h"
+#include "sd_card.h"
+#include "ff.h"
+#include "f_util.h"
 #include "ff_util.h"
 #include "hardware/rtc.h"
-#include "../platform_config.h"
+#include "hw_config.h"
+#include "platform_config.h"
 
 #ifndef MP_WEAK
 #define MP_WEAK __attribute__((weak))
@@ -15,15 +20,22 @@ MP_WEAK DWORD get_fattime(void) {
 }
 
 void filesystem_init() {
-    FATFS *fs;
-    fs = malloc(sizeof(FATFS));
-    if (f_mount(fs, "", FA_READ) != FR_OK) {
-        BYTE work[FLASH_SECTOR_SIZE];
-        MKFS_PARM opt = {.n_root=2048, .n_fat=2, .fmt=FM_FAT};
-        f_mkfs("", &opt, work, FLASH_SECTOR_SIZE);
-        f_setlabel(FS_LABEL);
+    FATFS fs;
+    sd_card_t *pSD = sd_get_by_num(0);
+    FRESULT fr = f_mount(&pSD->fatfs, pSD->pcName, 1);
+    TRACE_PRINTF(">>> %s\n", __FUNCTION__);
+
+    // Initialize SD card
+    if (!sd_init_driver()) {
+        panic("ERROR: Could not initialize SD card\r\n");
+        while (true);
+    }
+
+    // Mount filesystem
+    if (fr != FR_OK) {
+        panic("f_mount error: %s (%d)\r\n", FRESULT_str(fr), fr);
+        while (true);
     } else {
         f_unmount("");
     }
-    free(fs);
 }

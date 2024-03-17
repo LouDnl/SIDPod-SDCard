@@ -1,0 +1,7 @@
+{
+    "C_Cpp.files.exclude": {
+        "../SIDPod/**": true,
+        "../SIDPod-Vanilla/**": true,
+        "../pico-sdcard/**": true
+      }
+}

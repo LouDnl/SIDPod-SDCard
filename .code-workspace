@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../SIDPod-Vanilla"
+		},
+		{
+			"path": "../SIDPod"
+		}
+	],
+	"settings": {
+	}
+}

@@ -1,11 +1,22 @@
-CMakeLists.txt.user
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
-Makefile
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-_deps
+# ignore everything
+*
+
+# folders to include
+!include/
+!include/**
+!resources/
+!resources/**
+!scripts/
+!scripts/**
+!src/
+!src/**
+!.vscode/
+!.vscode/**
+
+# files to include
+!.gitattributes
+!.gitignore
+!.code-workspace
+!CMakeLists.txt
+!*.cmake
+!openocd.cfg

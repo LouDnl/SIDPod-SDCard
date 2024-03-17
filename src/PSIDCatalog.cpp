@@ -18,7 +18,7 @@ uint8_t windowPosition = 0;
 uint8_t selectedPosition = 0;
 uint8_t windowSize = CATALOG_WINDOW_SIZE;
 
-void PSIDCatalog::refresh() {
+void PSIDCatalog::refresh() {  // BUG: Currently breaks on large quantity of sids ~ out of memory error
     TRACE_PRINTF(">>> %s\n", __FUNCTION__);
     DIR *dp;
     FILINFO fno;
@@ -32,7 +32,7 @@ void PSIDCatalog::refresh() {
         fr = f_readdir(dp, &fno);
         if (fr != FR_OK || fno.fname[0] == 0) break;
         if (isRegularFile(&fno)) {
-            tryToAddAsPsid(&fno);
+            tryToAddAsPsid(&fno);  // TODO: Change this to just load the filenames
         }
     }
     f_closedir(dp);
